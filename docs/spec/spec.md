@@ -160,11 +160,49 @@ _Describes a linkage between a Channel and a Targetable and/or Sinkable._
 
 ### Life Cycle
 
-| Action | Reactions                                                        | Limitations |
-| ------ | ---------------------------------------------------------------- | ----------- |
-| Create | The publisher referenced needs to be watching for Subscriptions. |             |
-| Update |                                                                  |             |
-| Delete |                                                                  |             |
+There are two phases for Subscription reconciliation:
+
+1. resolving DNS names for the Subscription into a ResolvedSubscription
+   - create a new ResolvedSubscription
+   - set _role_ as the resolved 'eventing.knative.dev/role' annotation for the _spec.call_ target resource, or default to 'transformer' if not set
+   - set _callableDomain_ as the resolved DNS name for the _spec.call_ target resource according to the Targetable interface
+   - set _sinkableDomain_ as the resolved DNS name for the _spec.result_ target resource according to the Sinkable interface
+   - add an entry to the _routeMapping_ map for each ResultStrategyRoute setting the key from the _name_ and the value as the resolved DNS name for the _spec.result_ target resource according to the Sinkable interface
+2. updating the ResolvedSubscriptionSet resource
+   - resolve the resource referenced in the Subscription's _spec.from_
+   - from that resource, resolve the ResolvedSubscriptionSet via the Subscribable interface
+   - add/update/remove the ResolvedSubscription in the ResolvedSubscriptionSet resource
+
+| Action | Reactions                                                                                                                                                                                               | Limitations |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| Create | Create a ResolvedSubscription entry for the Subscription, add the new entry to the ResolvedSubscriptionSet specified by the Subscribable interface on the resource referenced by the _spec.from_ field. |             |
+| Update | Update the ResolvedSubscription entry for the Subscription with updated DNS name.                                                                                                                       |             |
+| Delete | Remove the ResolvedSubscription entry for the Subscription.                                                                                                                                             |             |
+
+---
+
+## kind: ResolvedSubscriptionSet
+
+### group: eventing.internal.knative.dev/v1alpha1
+
+_A ResolvedSubscriptionSet holds an aggregation of resolved subscriptions for a
+Channel._
+
+### Object Schema
+
+#### Spec
+
+| Field         | Type                   | Description                                                           | Limitations                            |
+| ------------- | ---------------------- | --------------------------------------------------------------------- | -------------------------------------- |
+| subscribers\* | ResolvedSubscription[] | Information about subscriptions used to implement message forwarding. | Filled out by Subscription Controller. |
+
+\*: Required
+
+#### Metadata
+
+##### Owner References
+
+- Owned (controlling) by the resource the subscribers are for.
 
 ---
 
@@ -302,7 +340,25 @@ non-controlling OwnerReference on the EventType resources it knows about.
 
 ### ChannelSubscriberSpec
 
-| Field          | Type   | Description                                     | Limitations |
-| -------------- | ------ | ----------------------------------------------- | ----------- |
-| callableDomain | String | The domain name of the endpoint for the call.   |             |
-| sinkableDomain | String | The domain name of the endpoint for the result. |             |
+| Field          | Type              | Description                                                       | Limitations                                               |
+| -------------- | ----------------- | ----------------------------------------------------------------- | --------------------------------------------------------- |
+| role           | String            | How to forward the response from callableDomain to sinkableDomain | One of: transformer, filter, router, splitter, aggregator |
+| callableDomain | String            | The domain name of the endpoint for the call.                     |                                                           |
+| sinkableDomain | String            | The domain name of the endpoint for the result.                   |                                                           |
+| routeMapping   | map[String]String | Named routes for the router role.                                 | The role must be router                                   |
+
+### ResultStrategy
+
+| Field                    | Type                  | Description                            | Limitations                         |
+| ------------------------ | --------------------- | -------------------------------------- | ----------------------------------- |
+| target<sup>1</sup>       | ObjectRef             | The continuation Channel for the link. | Must be a Channel.                  |
+| routeMapping<sup>1</sup> | []ResultStrategyRoute | Named routes for the router role       | The \_\_ must be of the router role |
+
+1: At least one of (target, routeMapping), Required.
+
+### ResultStrategyRoute
+
+| Field  | Type      | Description                                    | Limitations        |
+| ------ | --------- | ---------------------------------------------- | ------------------ |
+| name   | string    | The name retruned from the 'router' component. |                    |
+| target | ObjectRef | The continuation Channel for the link.         | Must be a Channel. |
