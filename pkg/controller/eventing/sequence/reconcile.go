@@ -37,12 +37,6 @@ const (
 	finalizerName = controllerAgentName
 )
 
-var defaultProvisioner = &corev1.ObjectReference{
-	APIVersion: "eventing.knative.dev/v1alpha1",
-	Kind:       "ClusterChannelProvisioner",
-	Name:       "in-memory-channel",
-}
-
 // Reconcile compares the actual state with the desired, and attempts to
 // converge the two. It then updates the Status block of the Sequence resource
 // with the current status of the resource.
@@ -107,7 +101,13 @@ func (r *reconciler) reconcile(sequence *v1alpha1.Sequence) error {
 func (r *reconciler) reconcileStep(sequence *v1alpha1.Sequence, i int) error {
 	step := sequence.Spec.Steps[i]
 	name := fmt.Sprintf("%s-step-%d", sequence.Name, i)
-	channel := makeChannel(name, sequence.Namespace, defaultProvisioner, sequence)
+	var provisioner *corev1.ObjectReference
+	if step.Provisioner != nil {
+		provisioner = step.Provisioner
+	} else if sequence.Spec.Provisioner != nil {
+		provisioner = sequence.Spec.Provisioner
+	}
+	channel := makeChannel(name, sequence.Namespace, provisioner, sequence)
 	err := r.reconcileChannel(channel)
 	if err != nil {
 		glog.Errorf("Unable to reconcile channel for sequence: %v", err)
@@ -125,7 +125,7 @@ func (r *reconciler) reconcileStep(sequence *v1alpha1.Sequence, i int) error {
 			},
 		}
 	}
-	subscription := makeSubscription(name, sequence.Namespace, makeChannelRef(channel), step, reply, sequence)
+	subscription := makeSubscription(name, sequence.Namespace, makeChannelRef(channel), step.SubscriberSpec, reply, sequence)
 	err = r.reconcileSubscription(subscription)
 	if err != nil {
 		glog.Errorf("Unable to reconcile subscription for sequence: %v", err)
@@ -157,6 +157,9 @@ func (r *reconciler) reconcileChannel(channel *v1alpha1.Channel) error {
 	// copy fields that mutate independent of our control
 	newChannel.Spec.Generation = channel.Spec.Generation
 	newChannel.Spec.Subscribable = channel.Spec.Subscribable
+	if channel.Spec.Provisioner == nil {
+		channel.Spec.Provisioner = newChannel.Spec.Provisioner
+	}
 	if !equality.Semantic.DeepEqual(channel.Spec, newChannel.Spec) {
 		newChannel.Spec = channel.Spec
 		updated = true

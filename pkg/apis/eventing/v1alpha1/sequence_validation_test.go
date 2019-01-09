@@ -33,7 +33,7 @@ func TestSequenceValidation(t *testing.T) {
 	name := "empty sequence"
 	s := &Sequence{
 		Spec: SequenceSpec{
-			Steps: []*SubscriberSpec{},
+			Steps: []*StepSpec{},
 		},
 	}
 	want := &apis.FieldError{}
@@ -55,15 +55,15 @@ func TestSequenceSpecValidation(t *testing.T) {
 	}{{
 		name: "valid",
 		s: &SequenceSpec{
-			Steps: []*SubscriberSpec{
-				getValidSubscriberSpec(),
+			Steps: []*StepSpec{
+				{SubscriberSpec: getValidSubscriberSpec()},
 			},
 		},
 		want: nil,
 	}, {
 		name: "empty Sequence",
 		s: &SequenceSpec{
-			Steps: []*SubscriberSpec{},
+			Steps: []*StepSpec{},
 		},
 		want: nil,
 	}}
@@ -88,15 +88,15 @@ func TestSequenceImmutable(t *testing.T) {
 		name: "valid",
 		s: &Sequence{
 			Spec: SequenceSpec{
-				Steps: []*SubscriberSpec{
-					getValidSubscriberSpec(),
+				Steps: []*StepSpec{
+					{SubscriberSpec: getValidSubscriberSpec()},
 				},
 			},
 		},
 		og: &Sequence{
 			Spec: SequenceSpec{
-				Steps: []*SubscriberSpec{
-					getValidSubscriberSpec(),
+				Steps: []*StepSpec{
+					{SubscriberSpec: getValidSubscriberSpec()},
 				},
 			},
 		},
@@ -105,16 +105,16 @@ func TestSequenceImmutable(t *testing.T) {
 		name: "new steps are rejected",
 		s: &Sequence{
 			Spec: SequenceSpec{
-				Steps: []*SubscriberSpec{
-					getValidSubscriberSpec(),
-					getValidSubscriberSpec(),
+				Steps: []*StepSpec{
+					{SubscriberSpec: getValidSubscriberSpec()},
+					{SubscriberSpec: getValidSubscriberSpec()},
 				},
 			},
 		},
 		og: &Sequence{
 			Spec: SequenceSpec{
-				Steps: []*SubscriberSpec{
-					getValidSubscriberSpec(),
+				Steps: []*StepSpec{
+					{SubscriberSpec: getValidSubscriberSpec()},
 				},
 			},
 		},
@@ -123,20 +123,20 @@ func TestSequenceImmutable(t *testing.T) {
 			Paths:   []string{"spec"},
 			Details: `{v1alpha1.SequenceSpec}.Steps[?->1]:
 	-: <non-existent>
-	+: &v1alpha1.SubscriberSpec{Ref: s"&ObjectReference{Kind:Route,Namespace:,Name:subscriber,UID:,APIVersion:serving.knative.dev/v1alpha1,ResourceVersion:,FieldPath:,}"}
+	+: &v1alpha1.StepSpec{SubscriberSpec: &v1alpha1.SubscriberSpec{Ref: s"&ObjectReference{Kind:Route,Namespace:,Name:subscriber,UID:,APIVersion:serving.knative.dev/v1alpha1,ResourceVersion:,FieldPath:,}"}}
 `,
 		},
 	}, {
 		name: "removing steps is rejected",
 		s: &Sequence{
 			Spec: SequenceSpec{
-				Steps: []*SubscriberSpec{},
+				Steps: []*StepSpec{},
 			},
 		},
 		og: &Sequence{
 			Spec: SequenceSpec{
-				Steps: []*SubscriberSpec{
-					getValidSubscriberSpec(),
+				Steps: []*StepSpec{
+					{SubscriberSpec: getValidSubscriberSpec()},
 				},
 			},
 		},
@@ -144,7 +144,7 @@ func TestSequenceImmutable(t *testing.T) {
 			Message: "Immutable fields changed (-old +new)",
 			Paths:   []string{"spec"},
 			Details: `{v1alpha1.SequenceSpec}.Steps[0->?]:
-	-: &v1alpha1.SubscriberSpec{Ref: s"&ObjectReference{Kind:Route,Namespace:,Name:subscriber,UID:,APIVersion:serving.knative.dev/v1alpha1,ResourceVersion:,FieldPath:,}"}
+	-: &v1alpha1.StepSpec{SubscriberSpec: &v1alpha1.SubscriberSpec{Ref: s"&ObjectReference{Kind:Route,Namespace:,Name:subscriber,UID:,APIVersion:serving.knative.dev/v1alpha1,ResourceVersion:,FieldPath:,}"}}
 	+: <non-existent>
 `,
 		},
@@ -152,8 +152,8 @@ func TestSequenceImmutable(t *testing.T) {
 		name: "new nil is ok",
 		s: &Sequence{
 			Spec: SequenceSpec{
-				Steps: []*SubscriberSpec{
-					getValidSubscriberSpec(),
+				Steps: []*StepSpec{
+					{SubscriberSpec: getValidSubscriberSpec()},
 				},
 			},
 		},
@@ -175,8 +175,8 @@ func TestSequenceInvalidImmutableType(t *testing.T) {
 	name := "invalid type"
 	s := &Sequence{
 		Spec: SequenceSpec{
-			Steps: []*SubscriberSpec{
-				getValidSubscriberSpec(),
+			Steps: []*StepSpec{
+				{SubscriberSpec: getValidSubscriberSpec()},
 			},
 		},
 	}

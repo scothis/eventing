@@ -227,7 +227,7 @@ func Sequence() *SequenceBuilder {
 		TypeMeta:   sequenceType(),
 		ObjectMeta: om(testNS, sequenceName),
 		Spec: eventingv1alpha1.SequenceSpec{
-			Steps: []*eventingv1alpha1.SubscriberSpec{},
+			Steps: []*eventingv1alpha1.StepSpec{},
 			Reply: &eventingv1alpha1.ReplyStrategy{
 				Channel: &corev1.ObjectReference{
 					Name:       resultChannelName,
@@ -262,11 +262,13 @@ func (s *SequenceBuilder) NilReply() *SequenceBuilder {
 }
 
 func (s *SequenceBuilder) AddStep() *SequenceBuilder {
-	s.Spec.Steps = append(s.Spec.Steps, &eventingv1alpha1.SubscriberSpec{
-		Ref: &corev1.ObjectReference{
-			Name:       k8sServiceName,
-			Kind:       "Service",
-			APIVersion: "v1",
+	s.Spec.Steps = append(s.Spec.Steps, &eventingv1alpha1.StepSpec{
+		SubscriberSpec: &eventingv1alpha1.SubscriberSpec{
+			Ref: &corev1.ObjectReference{
+				Name:       k8sServiceName,
+				Kind:       "Service",
+				APIVersion: "v1",
+			},
 		},
 	})
 	return s

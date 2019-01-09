@@ -20,6 +20,7 @@ import (
 	"github.com/knative/pkg/apis"
 	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 	"github.com/knative/pkg/webhook"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
@@ -54,13 +55,29 @@ type SequenceSpec struct {
 	// +optional
 	Generation int64 `json:"generation,omitempty"`
 
+	// Provisioner defines the name of the Provisioner backing channels created
+	// by default for each step. If not set, the cluster's default provisioner
+	// is used. Each step may specify a custom provisioner.
+	// +optional
+	Provisioner *corev1.ObjectReference `json:"provisioner,omitempty"`
+
 	// Steps the event follows...
-	Steps []*SubscriberSpec `json:"steps,omitempty"`
+	Steps []*StepSpec `json:"steps,omitempty"`
 
 	// Reply specifies (optionally) how to handle events returned from
 	// the last step.
 	// +optional
 	Reply *ReplyStrategy `json:"reply,omitempty"`
+}
+
+type StepSpec struct {
+	*SubscriberSpec `json:",inline"`
+
+	// Provisioner defines how the Channel for this specific step is created.
+	// If not set, the provisioner can be defined for the Sequence or cluster
+	// wide.
+	// +optional
+	Provisioner *corev1.ObjectReference `json:"provisioner,omitempty"`
 }
 
 // seqCondSet is a condition set with Ready as the happy condition and
