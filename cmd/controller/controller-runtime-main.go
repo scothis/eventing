@@ -19,6 +19,7 @@ import (
 	"strings"
 
 	eventingv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
+	"github.com/knative/eventing/pkg/controller/eventing/sequence"
 	"github.com/knative/eventing/pkg/controller/eventing/subscription"
 	istiov1alpha3 "github.com/knative/pkg/apis/istio/v1alpha3"
 	"go.uber.org/zap"
@@ -41,6 +42,7 @@ type ProvideFunc func(manager.Manager) (controller.Controller, error)
 // controller-runtime. When the controllers are no longer experimental they may
 // be added to the default providers list.
 var ExperimentalControllers = map[string]ProvideFunc{
+	"sequence.eventing.knative.dev":     sequence.ProvideController,
 	"subscription.eventing.knative.dev": subscription.ProvideController,
 }
 

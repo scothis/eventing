@@ -29,6 +29,7 @@ type EventingV1alpha1Interface interface {
 	RESTClient() rest.Interface
 	ChannelsGetter
 	ClusterChannelProvisionersGetter
+	SequencesGetter
 	SubscriptionsGetter
 }
 
@@ -43,6 +44,10 @@ func (c *EventingV1alpha1Client) Channels(namespace string) ChannelInterface {
 
 func (c *EventingV1alpha1Client) ClusterChannelProvisioners() ClusterChannelProvisionerInterface {
 	return newClusterChannelProvisioners(c)
+}
+
+func (c *EventingV1alpha1Client) Sequences(namespace string) SequenceInterface {
+	return newSequences(c, namespace)
 }
 
 func (c *EventingV1alpha1Client) Subscriptions(namespace string) SubscriptionInterface {

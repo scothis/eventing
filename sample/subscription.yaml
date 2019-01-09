@@ -1,0 +1,14 @@
+apiVersion: eventing.knative.dev/v1alpha1
+kind: Subscription
+metadata:
+  name: numbers
+spec:
+  channel:
+    apiVersion: eventing.knative.dev/v1alpha1
+    kind: Channel
+    name: numbers
+  subscriber:
+    ref:
+      apiVersion: eventing.knative.dev/v1alpha1
+      kind: Sequence
+      name: h2

@@ -98,6 +98,7 @@ func main() {
 			// For group eventing.knative.dev,
 			eventingv1alpha1.SchemeGroupVersion.WithKind("Channel"):                   &eventingv1alpha1.Channel{},
 			eventingv1alpha1.SchemeGroupVersion.WithKind("ClusterChannelProvisioner"): &eventingv1alpha1.ClusterChannelProvisioner{},
+			eventingv1alpha1.SchemeGroupVersion.WithKind("Sequence"):                  &eventingv1alpha1.Sequence{},
 			eventingv1alpha1.SchemeGroupVersion.WithKind("Subscription"):              &eventingv1alpha1.Subscription{},
 		},
 		Logger: logger,

@@ -34,7 +34,7 @@ spec:
         args: [
           "-logtostderr",
           "-stderrthreshold", "INFO",
-          "--experimentalControllers=subscription.eventing.knative.dev" # comma separated list.
+          "--experimentalControllers=sequence.eventing.knative.dev,subscription.eventing.knative.dev" # comma separated list.
         ]
         volumeMounts:
           - name: config-logging

@@ -21,6 +21,10 @@ For more details, see [Interface Contracts](interfaces.md).
 - A **Channel** provides event persistence and fanout of events from a
   well-known input address to multiple outputs described by _Subscriptions_.
 
+Higher level resources that decompose to Subscriptions and Channels are included.
+
+- A **Sequnce** directs an event through a series of steps.
+
 <!-- This image is sourced from https://drive.google.com/open?id=10mmXzDb8S_4_ZG_hcBr7s4HPISyBqcqeJLTXLwkilRc -->
 
 ![Resource Types Overview](images/resource-types-overview.svg)
@@ -80,6 +84,13 @@ _Channels_.
 
 For more details, see
 [Kind: ClusterChannelProvisioner](spec.md#kind-clusterchannelprovisioner).
+
+## Sequence
+
+**Sequence** directs an event though a series of steps.
+
+For more details, see
+[Kind: Sequence](spec.md#kind-sequence).
 
 ---
 

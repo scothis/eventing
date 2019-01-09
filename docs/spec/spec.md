@@ -12,6 +12,7 @@ This document details our _Spec_ and _Status_ customizations.
 - [Channel](#kind-channel)
 - [Subscription](#kind-subscription)
 - [ClusterChannelProvisioner](#kind-clusterchannelprovisioner)
+- [Sequence](#kind-sequence)
 
 ## kind: Channel
 
@@ -147,6 +148,59 @@ a Channel system that receives and delivers events._
 
 - Resource Created.
 - Resource Removed.
+
+---
+
+## kind: Sequence
+
+### group: eventing.knative.dev/v1alpha1
+
+_A Sequence logically directs events through a series of steps and then emits to a destination._
+
+The event is delivered to a Channel between the processing of each step.
+
+### Object Schema
+
+#### Spec
+
+| Field   | Type             | Description                        | Constraints                       |
+| ------- | ---------------- | ---------------------------------- | --------------------------------- |
+| steps\* | []SubscriberSpec | Ordered processing on the event.   | The number of steps is Immutable. |
+| reply   | ReplyStrategy    | The continuation for the sequence. |                                   |
+
+\*: Required
+
+#### Metadata
+
+##### Owner References
+
+- If a resource controller created this Subscription: Owned by the originating resource.
+
+#### Status
+
+| Field      | Type        | Description                                                                                  | Constraints |
+| ---------- | ----------- | -------------------------------------------------------------------------------------------- | ----------- |
+| address    | Addressable | Address of the endpoint which meets the [_Addressable_ contract](interfaces.md#addressable). |             |
+| conditions | Conditions  | Sequence conditions.                                                                         |             |
+
+##### Conditions
+
+- **Ready.** True when the Sequence is provisioned and ready to accept events.
+- **Addressable.** True when the Sequence is able to accept events, this does not necessarily mean the events will be processed.
+- **Provisioned.** True when the Sequence has been provisioned by a controller.
+
+#### Events
+
+- Provisioned
+- Deprovisioned
+
+### Life Cycle
+
+| Action | Reactions                                                                                 | Constraints |
+| ------ | ----------------------------------------------------------------------------------------- | ----------- |
+| Create | The eventing controller creates a Channel and Subscription for each step of the Sequence. The Address of the first step's Channel is the Address of the Sequence. |             |
+| Update | The eventing controller updates each step's Channel and Subscription as needed.           |             |
+| Delete | The Channel and Subscription for each step are deleted.                                   |             |
 
 ---
 

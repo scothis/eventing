@@ -30,6 +30,14 @@ type ChannelNamespaceListerExpansion interface{}
 // ClusterChannelProvisionerLister.
 type ClusterChannelProvisionerListerExpansion interface{}
 
+// SequenceListerExpansion allows custom methods to be added to
+// SequenceLister.
+type SequenceListerExpansion interface{}
+
+// SequenceNamespaceListerExpansion allows custom methods to be added to
+// SequenceNamespaceLister.
+type SequenceNamespaceListerExpansion interface{}
+
 // SubscriptionListerExpansion allows custom methods to be added to
 // SubscriptionLister.
 type SubscriptionListerExpansion interface{}

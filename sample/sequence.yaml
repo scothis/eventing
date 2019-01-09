@@ -1,0 +1,19 @@
+apiVersion: eventing.knative.dev/v1alpha1
+kind: Sequence
+metadata:
+  name: h2
+spec:
+  steps:
+  - ref:
+      apiVersion: serving.knative.dev/v1alpha1
+      kind: Service
+      name: square
+  - ref:
+      apiVersion: serving.knative.dev/v1alpha1
+      kind: Service
+      name: greet
+  reply:
+    channel:
+      apiVersion: eventing.knative.dev/v1alpha1
+      kind: Channel
+      name: replies

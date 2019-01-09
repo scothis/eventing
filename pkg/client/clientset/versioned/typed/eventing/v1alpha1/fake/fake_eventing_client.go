@@ -36,6 +36,10 @@ func (c *FakeEventingV1alpha1) ClusterChannelProvisioners() v1alpha1.ClusterChan
 	return &FakeClusterChannelProvisioners{c}
 }
 
+func (c *FakeEventingV1alpha1) Sequences(namespace string) v1alpha1.SequenceInterface {
+	return &FakeSequences{c, namespace}
+}
+
 func (c *FakeEventingV1alpha1) Subscriptions(namespace string) v1alpha1.SubscriptionInterface {
 	return &FakeSubscriptions{c, namespace}
 }
