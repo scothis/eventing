@@ -157,16 +157,21 @@ a Channel system that receives and delivers events._
 
 _A Sequence logically directs events through a series of steps and then emits to a destination._
 
-The event is delivered to a Channel between the processing of each step.
+The event is delivered to a Channel before being dispatched to the subscriber of each step. The provisioner for each step's Channel is defined independently, in order of precedence the provisioner may be defined by:
+
+1. the step
+2. the Sequence
+3. the cluster
 
 ### Object Schema
 
 #### Spec
 
-| Field   | Type             | Description                        | Constraints                       |
-| ------- | ---------------- | ---------------------------------- | --------------------------------- |
-| steps\* | []SubscriberSpec | Ordered processing on the event.   | The number of steps is Immutable. |
-| reply   | ReplyStrategy    | The continuation for the sequence. |                                   |
+| Field       | Type            | Description                                                                | Constraints                       |
+| ----------- | --------------- | -------------------------------------------------------------------------- | --------------------------------- |
+| steps\*     | []StepSpec      | Ordered processing on the event.                                           | The number of steps is Immutable. |
+| reply       | ReplyStrategy   | The continuation for the sequence.                                         |                                   |
+| provisioner | ObjectReference | The name of the provisioner to create the resources that back the Channel. | Immutable.                        |
 
 \*: Required
 
@@ -196,11 +201,11 @@ The event is delivered to a Channel between the processing of each step.
 
 ### Life Cycle
 
-| Action | Reactions                                                                                 | Constraints |
-| ------ | ----------------------------------------------------------------------------------------- | ----------- |
+| Action | Reactions                                                                                                                                                         | Constraints |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
 | Create | The eventing controller creates a Channel and Subscription for each step of the Sequence. The Address of the first step's Channel is the Address of the Sequence. |             |
-| Update | The eventing controller updates each step's Channel and Subscription as needed.           |             |
-| Delete | The Channel and Subscription for each step are deleted.                                   |             |
+| Update | The eventing controller updates each step's Channel and Subscription as needed.                                                                                   |             |
+| Delete | The Channel and Subscription for each step are deleted.                                                                                                           |             |
 
 ---
 
@@ -230,3 +235,15 @@ The event is delivered to a Channel between the processing of each step.
 | channel\* | ObjectRef | The continuation Channel for the link. | Must be a Channel. |
 
 \*: Required
+
+### StepSpec
+
+| Field               | Type            | Description                                                                | Constraints              |
+| ------------------- | --------------- | -------------------------------------------------------------------------- | ------------------------ |
+| ref<sup>1</sup>     | ObjectReference |                                                                            | Must adhere to Callable. |
+| dnsName<sup>1</sup> | String          |                                                                            |                          |
+| provisioner         | ObjectReference | The name of the provisioner to create the resources that back the Channel. | Immutable.               |
+
+1: One of (ref, dnsName), Required.
+
+Note: SubscriberSpec is embedded within StepSpec
